@@ -2,7 +2,7 @@
 layout: default
 title: "Lets Encrypt for internal hostnames"
 ---
-## Using Lets Encrypt for internal hostnames
+## Why and How?
 
 One of the obvious issues with [lets encrypt](https://letsencrypt.org/) is how do we use it to create certificates for hostnames that don't exist on the internet?  Let me describe a scenario; a company has both an internal and external view of their
 domain. The external hosts can easily be setup with lets encrypt, but the internal hosts do not appear in the external view and can't be validated. How do we make this work?  
