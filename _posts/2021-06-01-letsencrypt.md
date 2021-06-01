@@ -7,7 +7,7 @@ domain. The external hosts can easily be setup with lets encrypt, but the intern
 
 Let's start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views will work. You will probably have something like this:
 
-{% raw %}
+```yaml
 view "internal" {
 	match-clients { 
 		10.10.0.0/8;
@@ -27,7 +27,7 @@ view "external" {
 		type master;
 	};
 };
-{% endraw %}
+```
 
 In the internal view you might have a hostname like "infranet.exampledomain.com", which does not exist externally. How do we get Lets Encrypt to assign us a certificate for this hostname?
 
@@ -36,29 +36,29 @@ In the internal view you might have a hostname like "infranet.exampledomain.com"
 [RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates. We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
 This record will look like this:
 
-{% raw %}
+```yaml
 _acme-challenge.infranet.example.com. 300 IN TXT "gfj9Xq...Rg85nM"
-{% endraw %}
+```
 
 First, we need to install certbot, under Debian you can accomplish this with the following:
 
-{% raw %}
+```yaml
 # apt-get install certbot python3-certbot-dns-rfc2136
-{% endraw %}
+```
 
 Next, we need to create a credentials file to use. This file will store your key and tell it which server to update. I would also recommend restricting who can access this file. Before we create this file we need
 to generate a TSIG key. The easiest way to do this is to run "tsig-keygen certbot" from the server you have bind installed on. That will create this output.
 
-{% raw %}
+```yaml
 key "certbot" {
 	algorithm hmac-sha256;
 	secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
-{% endraw %}
+```
 
 Save this file under /etc/letsencrypt/dns-creds.ini and chmod 600 it.
 
-{% raw %}
+```yaml
 # Your authorative server
 dns_rfc2136_server = 192.168.1.1
 # TSIG key
@@ -67,20 +67,20 @@ dns_rfc2136_name = certbot
 dns_rfc2136_secret = 9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=
 # TSIG algorithm
 dns_rfc2136_algorithm = HMAC-SHA512
-{% endraw %}
+```
 
 Now you will need to add support for this TSIG key to BIND. Edit your bind configuration file. Under Debian this will be /etc/bind/named.conf.local you will need to add the following:
 
-{% raw %}
+```yaml
 key "certbot" {
         algorithm hmac-sha256;
         secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
-{% endraw %}
+```
 
 Next you will need to edit your views such that clients using the certbot TSIG appear in the external view.
 
-{% raw %}
+```yaml
 view "internal" {
         match-clients {
 		!key certbot;
@@ -95,29 +95,29 @@ view "external" {
                 0.0.0.0/0;
         };
 };
-{% endraw %}
+```
 
 After this you will need to allow the TSIG key permission to update the external zone. 
 
-{% raw %}
+```yaml
         zone "exampledomain.com" IN {
                 type master;
 		update-policy {
 			grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
 		};
         };
-{% endraw %}
+```
 
 
 At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration. Onto running certbot.
 
-{% raw %}
+```yaml
 # certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini -d infranet.exampledomain.com
-{% endraw %}
+```
 
 And if all has gone well, you should end up with a /etc/letsencrypt/renewal/infranet.exampledomain.com.conf
 
-{% raw %}
+```yaml
 # renew_before_expiry = 30 days
 version = 0.31.0
 archive_dir = /etc/letsencrypt/archive/infranet.exampledomain.com
@@ -132,7 +132,7 @@ account = a26a8e05647c62e248cd7528ac4691df
 authenticator = dns-rfc2136
 dns_rfc2136_credentials = /etc/letsencrypt/dns-creds.ini
 server = https://acme-v02.api.letsencrypt.org/directory
-{% endraw %}
+```
 
 From here you can load /etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem and /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem into whatever daemon configuration you need. If you're using apache or nginx, 
 you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
