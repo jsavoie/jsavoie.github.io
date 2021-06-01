@@ -82,30 +82,30 @@ Next you will need to edit your views such that clients using the certbot TSIG a
 
 ```yaml
 view "internal" {
-        match-clients {
+	match-clients {
 		!key certbot;
-                10.10.0.0/8;
-                192.168.0.0/16;
-        };
+		10.10.0.0/8;
+		192.168.0.0/16;
+	};
 };
 
 view "external" {
-        match-clients {
+	match-clients {
 		key certbot;
-                0.0.0.0/0;
-        };
+		0.0.0.0/0;
+	};
 };
 ```
 
 After this you will need to allow the TSIG key permission to update the external zone. 
 
 ```yaml
-        zone "exampledomain.com" IN {
-                type master;
+	zone "exampledomain.com" IN {
+		type master;
 		update-policy {
 			grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
 		};
-        };
+	};
 ```
 
 
@@ -134,12 +134,18 @@ dns_rfc2136_credentials = /etc/letsencrypt/dns-creds.ini
 server = https://acme-v02.api.letsencrypt.org/directory
 ```
 
-From here you can load /etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem and /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem into whatever daemon configuration you need. If you're using apache or nginx, 
-you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
+From here you can load
 
-installer = apache
-or
-installer = nginx
+```yaml
+/etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem
+/etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem
+```
+
+into whatever daemon configuration you need. If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
+
+installer = apache\
+or\
+installer = nginx\
 
 Debian by default will call reload on apache to rotate the logs once a week, so this may not be strictly necessary. Your mileage may vary, and you may want to setup something in /etc/letsencrypt/renewal-hooks/post if
 you're using a daemon that doesn't regularly reload it's certificates.
