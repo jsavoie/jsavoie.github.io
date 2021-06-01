@@ -113,7 +113,8 @@ zone "exampledomain.com" IN {
 At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration. Onto running certbot.
 
 ```
-# certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini -d infranet.exampledomain.com
+# certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini \ 
+        -d infranet.exampledomain.com
 ```
 
 And if all has gone well, you should end up with a /etc/letsencrypt/renewal/infranet.exampledomain.com.conf like this
