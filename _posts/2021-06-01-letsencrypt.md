@@ -36,11 +36,15 @@ In the internal view you might have a hostname like "infranet.exampledomain.com"
 [RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates. We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
 This record will look like this:
 
+{% raw %}
 _acme-challenge.infranet.example.com. 300 IN TXT "gfj9Xq...Rg85nM"
+{% endraw %}
 
 First, we need to install certbot, under Debian you can accomplish this with the following:
 
+{% raw %}
 # apt-get install certbot python3-certbot-dns-rfc2136
+{% endraw %}
 
 Next, we need to create a credentials file to use. This file will store your key and tell it which server to update. I would also recommend restricting who can access this file. Before we create this file we need
 to generate a TSIG key. The easiest way to do this is to run "tsig-keygen certbot" from the server you have bind installed on. That will create this output.
@@ -107,7 +111,9 @@ After this you will need to allow the TSIG key permission to update the external
 
 At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration. Onto running certbot.
 
+{% raw %}
 # certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini -d infranet.exampledomain.com
+{% endraw %}
 
 And if all has gone well, you should end up with a /etc/letsencrypt/renewal/infranet.exampledomain.com.conf
 
