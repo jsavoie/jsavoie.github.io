@@ -1,31 +1,32 @@
-## Using Lets encrypt for internal hostnames
+## Using Lets Encrypt for internal hostnames
 
 One of the obvious issues with [lets encrypt](https://letsencrypt.org/) is how do we use it to create certificates for hostnames that don't exist on the internet?  Let me describe a scenario; a company has both an internal and external view of their
 domain. The external hosts can easily be setup with lets encrypt, but the internal hosts do not appear in the external view and can't be validated. How do we make this work?  
 
 ### Bind
 
-Let's start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views will work. You will probably have something like this:
+Let's start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views/ddns/tsig will work. You probably have something like this:
 
-```yaml
+```
 view "internal" {
-match-clients { 
-10.10.0.0/8;
-192.168.0.0/16;
+        match-clients { 
+                10.10.0.0/8;
+                192.168.0.0/16;
+        };
+
+        zone "exampledomain.com" IN {
+                type master;
+        };
 };
 
-zone "exampledomain.com" IN {
-type master;
-};
-};
 view "external" {
-match-clients {
-0.0.0.0/0;
-};
+        match-clients {
+                0.0.0.0/0;
+        };
 
-zone "exampledomain.com" IN {
-type master;
-};
+        zone "exampledomain.com" IN {
+                type master;
+        };
 };
 ```
 
@@ -36,29 +37,29 @@ In the internal view you might have a hostname like "infranet.exampledomain.com"
 [RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates. We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
 This record will look like this:
 
-```yaml
+```
 _acme-challenge.infranet.example.com. 300 IN TXT "gfj9Xq...Rg85nM"
 ```
 
-First, we need to install certbot, under Debian you can accomplish this with the following:
+First, we need to install certbot (and the rfc2136 plugin), under Debian you can accomplish this with the following:
 
-```yaml
+```
 # apt-get install certbot python3-certbot-dns-rfc2136
 ```
 
 Next, we need to create a credentials file to use. This file will store your key and tell it which server to update. I would also recommend restricting who can access this file. Before we create this file we need
 to generate a TSIG key. The easiest way to do this is to run "tsig-keygen certbot" from the server you have bind installed on. That will create this output.
 
-```yaml
+```
 key "certbot" {
-algorithm hmac-sha256;
-secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
+        algorithm hmac-sha256;
+        secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
 ```
 
 Save this file under /etc/letsencrypt/dns-creds.ini and chmod 600 it.
 
-```yaml
+```
 # Your authorative server
 dns_rfc2136_server = 192.168.1.1
 # TSIG key
@@ -71,55 +72,54 @@ dns_rfc2136_algorithm = HMAC-SHA512
 
 Now you will need to add support for this TSIG key to BIND. Edit your bind configuration file. Under Debian this will be /etc/bind/named.conf.local you will need to add the following:
 
-```yaml
+```
 key "certbot" {
-algorithm hmac-sha256;
-secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
+        algorithm hmac-sha256;
+        secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
 ```
 
 Next you will need to edit your views such that clients using the certbot TSIG appear in the external view.
 
-```yaml
+```
 view "internal" {
-match-clients {
-!key certbot;
-10.10.0.0/8;
-192.168.0.0/16;
-};
+        match-clients {
+                !key certbot;
+                10.10.0.0/8;
+                192.168.0.0/16;
+        };
 };
 
 view "external" {
-match-clients {
-key certbot;
-0.0.0.0/0;
-};
+        match-clients {
+                key certbot;
+                0.0.0.0/0;
+        };
 };
 ```
 
 After this you will need to allow the TSIG key permission to update the external zone. 
 
-```yaml
+```
 zone "exampledomain.com" IN {
-type master;
-update-policy {
-grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
-};
+        type master;
+        update-policy {
+                grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
+        };
 };
 ```
 
 
 At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration. Onto running certbot.
 
-```yaml
+```
 # certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini -d infranet.exampledomain.com
 ```
 
-And if all has gone well, you should end up with a /etc/letsencrypt/renewal/infranet.exampledomain.com.conf
+And if all has gone well, you should end up with a /etc/letsencrypt/renewal/infranet.exampledomain.com.conf like this
 
-```yaml
+```
 # renew_before_expiry = 30 days
-version = 0.31.0
 archive_dir = /etc/letsencrypt/archive/infranet.exampledomain.com
 cert = /etc/letsencrypt/live/infranet.exampledomain.com/cert.pem
 privkey = /etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem
@@ -128,26 +128,24 @@ fullchain = /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem
 
 # Options used in the renewal process
 [renewalparams]
-account = a26a8e05647c62e248cd7528ac4691df
 authenticator = dns-rfc2136
 dns_rfc2136_credentials = /etc/letsencrypt/dns-creds.ini
-server = https://acme-v02.api.letsencrypt.org/directory
 ```
 
 From here you can load
 
-```yaml
+```
 /etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem
 /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem
 ```
 
 into whatever daemon configuration you need. If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
 
-```yaml
+```
 installer = apache
 ```
 or
-```yaml
+```
 installer = nginx
 ```
 
