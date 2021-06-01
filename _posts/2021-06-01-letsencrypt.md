@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title: "Lets Encrypt for internal hostnames"
 ---
 ## Using Lets Encrypt for internal hostnames
