@@ -132,14 +132,14 @@ authenticator = dns-rfc2136
 dns_rfc2136_credentials = /etc/letsencrypt/dns-creds.ini
 ```
 
-From here you can load
+From here you can load into whatever daemon configuration you need.
 
 ```
 /etc/letsencrypt/live/infranet.exampledomain.com/privkey.pem
 /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem
 ```
 
-into whatever daemon configuration you need. If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
+If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
 
 ```
 installer = apache
