@@ -7,6 +7,7 @@ domain. The external hosts can easily be setup with lets encrypt, but the intern
 
 Lets start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views will work.  You will probably have something like this:
 
+{% highlight %}
 view "internal" {
 	match-clients { 
 		10.10.0.0/8;
@@ -26,6 +27,7 @@ view "external" {
 		type master;
 	};
 }
+{% endhighlight %}
 
 In the internal view you might have a hostname like "infranet.exampledomain.com", which does not exist externally.  How do we get Lets Encrypt to assign us a certificate for this hostname?
 
