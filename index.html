@@ -7,7 +7,8 @@ layout: default
 <div class="article">
 <ul>
 {% for post in site.posts limit: site.post_limit %}
-<li><a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a><small class="hidden-xs">{{ post.date | date: "%B %-d, %Y" }}</small></li>
+<li><a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+<small class="hidden-xs">{{ post.date | date: "%B %-d, %Y" }}</small></li>
 {% endfor %}
 </ul>
 </div>

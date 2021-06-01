@@ -1,3 +1,7 @@
+---
+layout: post
+title: "Lets Encrypt for internal hostnames"
+---
 ## Using Lets Encrypt for internal hostnames
 
 One of the obvious issues with [lets encrypt](https://letsencrypt.org/) is how do we use it to create certificates for hostnames that don't exist on the internet?  Let me describe a scenario; a company has both an internal and external view of their
