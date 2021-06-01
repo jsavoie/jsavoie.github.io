@@ -118,7 +118,7 @@ zone "exampledomain.com" IN {
 
 At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration.
 
-## Running certbot.
+## Running certbot
 
 ```
 # certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini \ 
