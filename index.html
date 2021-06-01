@@ -1,11 +1,19 @@
+---
+layout: default
+---
+
+<div class="container-fluid index">
+<div class="row">
 <div class="article">
 <ul>
 {% for post in site.posts limit: site.post_limit %}
 <li><a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a><small class="hidden-xs">{{ post.date | date: "%B %-d, %Y" }}</small></li>
 </ul>
+</div>
 
 <p class="links">
   {% if site.twitter_username %}<a href="http://www.twitter.com/{{ site.twitter_username }}" target="_new"><i class="fa fa-twitter"></i></a>{% endif %}
   {% if site.github_username %}<a href="https://github.com/{{ site.github_username }}" target="_new"><i class="fa fa-github-alt"></i></a>{% endif %}
 </p>
+</div>
 </div>
