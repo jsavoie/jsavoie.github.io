@@ -9,23 +9,23 @@ Let's start with a few basics. I'm going to assume you're using bind, but any DN
 
 ```yaml
 view "internal" {
-	match-clients { 
-		10.10.0.0/8;
-		192.168.0.0/16;
-	};
+match-clients { 
+10.10.0.0/8;
+192.168.0.0/16;
+};
 
-	zone "exampledomain.com" IN {
-		type master;
-	};
+zone "exampledomain.com" IN {
+type master;
+};
 };
 view "external" {
-	match-clients {
-		0.0.0.0/0;
-	};
+match-clients {
+0.0.0.0/0;
+};
 
-	zone "exampledomain.com" IN {
-		type master;
-	};
+zone "exampledomain.com" IN {
+type master;
+};
 };
 ```
 
@@ -51,8 +51,8 @@ to generate a TSIG key. The easiest way to do this is to run "tsig-keygen certbo
 
 ```yaml
 key "certbot" {
-	algorithm hmac-sha256;
-	secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
+algorithm hmac-sha256;
+secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
 ```
 
@@ -73,8 +73,8 @@ Now you will need to add support for this TSIG key to BIND. Edit your bind confi
 
 ```yaml
 key "certbot" {
-        algorithm hmac-sha256;
-        secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
+algorithm hmac-sha256;
+secret "9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=";
 };
 ```
 
@@ -82,30 +82,30 @@ Next you will need to edit your views such that clients using the certbot TSIG a
 
 ```yaml
 view "internal" {
-	match-clients {
-		!key certbot;
-		10.10.0.0/8;
-		192.168.0.0/16;
-	};
+match-clients {
+!key certbot;
+10.10.0.0/8;
+192.168.0.0/16;
+};
 };
 
 view "external" {
-	match-clients {
-		key certbot;
-		0.0.0.0/0;
-	};
+match-clients {
+key certbot;
+0.0.0.0/0;
+};
 };
 ```
 
 After this you will need to allow the TSIG key permission to update the external zone. 
 
 ```yaml
-	zone "exampledomain.com" IN {
-		type master;
-		update-policy {
-			grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
-		};
-	};
+zone "exampledomain.com" IN {
+type master;
+update-policy {
+grant certbot name _acme-challenge.infranet.exampledomain.com. txt;
+};
+};
 ```
 
 
@@ -143,9 +143,13 @@ From here you can load
 
 into whatever daemon configuration you need. If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
 
-installer = apache\
-or\
-installer = nginx\
+```yaml
+installer = apache
+```
+or
+```yaml
+installer = nginx
+```
 
 Debian by default will call reload on apache to rotate the logs once a week, so this may not be strictly necessary. Your mileage may vary, and you may want to setup something in /etc/letsencrypt/renewal-hooks/post if
 you're using a daemon that doesn't regularly reload it's certificates.
