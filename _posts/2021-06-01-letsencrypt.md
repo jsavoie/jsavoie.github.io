@@ -7,7 +7,7 @@ title: "Lets Encrypt for internal hostnames"
 One of the obvious issues with [lets encrypt](https://letsencrypt.org/) is how do we use it to create certificates for hostnames that don't exist on the internet?  Let me describe a scenario; a company has both an internal and external view of their
 domain. The external hosts can easily be setup with lets encrypt, but the internal hosts do not appear in the external view and can't be validated. How do we make this work?  
 
-### Bind
+## What you have now
 
 Let's start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views/ddns/tsig will work. You probably have something like this:
 
@@ -36,7 +36,7 @@ view "external" {
 
 In the internal view you might have a hostname like "infranet.exampledomain.com", which does not exist externally. How do we get Lets Encrypt to assign us a certificate for this hostname?
 
-### RFC 2136
+## RFC 2136
 
 [RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates. We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
 This record will look like this:
@@ -45,6 +45,7 @@ This record will look like this:
 _acme-challenge.infranet.example.com. 300 IN TXT "gfj9Xq...Rg85nM"
 ```
 
+## What you need to install
 First, we need to install certbot (and the rfc2136 plugin), under Debian you can accomplish this with the following:
 
 ```
@@ -74,6 +75,7 @@ dns_rfc2136_secret = 9LwsqWeFOOXi3t1410VkeFLFV0l9YM9miFPZd4hNJCM=
 dns_rfc2136_algorithm = HMAC-SHA512
 ```
 
+## Changes you need to make
 Now you will need to add support for this TSIG key to BIND. Edit your bind configuration file. Under Debian this will be /etc/bind/named.conf.local you will need to add the following:
 
 ```
@@ -114,7 +116,9 @@ zone "exampledomain.com" IN {
 ```
 
 
-At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration. Onto running certbot.
+At this point you can finish editing bind and can call "service bind9 reload" to reload the configuration.
+
+## Running certbot.
 
 ```
 # certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini \ 
@@ -137,6 +141,7 @@ authenticator = dns-rfc2136
 dns_rfc2136_credentials = /etc/letsencrypt/dns-creds.ini
 ```
 
+## Your keys are here
 From here you can load into whatever daemon configuration you need.
 
 ```
@@ -154,5 +159,6 @@ or
 installer = nginx
 ```
 
+## Dealing with renewals
 Debian by default will call reload on apache to rotate the logs once a week, so this may not be strictly necessary. Your mileage may vary, and you may want to setup something in /etc/letsencrypt/renewal-hooks/post if
 you're using a daemon that doesn't regularly reload it's certificates.
