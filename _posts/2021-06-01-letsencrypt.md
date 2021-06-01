@@ -8,29 +8,38 @@ domain. The external hosts can easily be setup with lets encrypt, but the intern
 Lets start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views will work.  You will probably have something like this:
 
 {% highlight %}
-view "internal" {
-	match-clients { 
+view "internal" {{
+	match-clients {{ 
 		10.10.0.0/8;
 		192.168.0.0/16;
-	};
+	}};
 
-	zone "exampledomain.com" IN {
+	zone "exampledomain.com" IN {{
 		type master;
-	};
+	}};
 
-view "external" {
-	match-clients {
+view "external" {{
+	match-clients {{
 		0.0.0.0/0;
-	};
+	}};
 
-	zone "exampledomain.com" IN {
+	zone "exampledomain.com" IN {{
 		type master;
-	};
-}
+	}};
+}}
 {% endhighlight %}
 
 In the internal view you might have a hostname like "infranet.exampledomain.com", which does not exist externally.  How do we get Lets Encrypt to assign us a certificate for this hostname?
 
 ### RFC 2136
 
-[RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates.  We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily.
+[RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates.  We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
+This record will look like _acme-challenge.infranet.exampledomain.com TXT
+
+First we need to install certbot, under Debian you can accomplish this with the following:
+
+# apt-get install certbot
+
+And then you will need the plugin for RFC 2136
+
+# apt-get install python3-certbot-dns-rfc2136
