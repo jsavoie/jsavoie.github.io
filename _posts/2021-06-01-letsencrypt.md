@@ -38,8 +38,8 @@ This record will look like _acme-challenge.infranet.exampledomain.com TXT
 
 First we need to install certbot, under Debian you can accomplish this with the following:
 
-# apt-get install certbot
+{% highlight %}
+apt-get install certbot
+apt-get install python3-certbot-dns-rfc2136
+{% endhighlight %}
 
-And then you will need the plugin for RFC 2136
-
-# apt-get install python3-certbot-dns-rfc2136
