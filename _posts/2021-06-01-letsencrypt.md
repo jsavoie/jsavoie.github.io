@@ -1,14 +1,12 @@
 ---
-layout: default
+layout: post
 title: "Lets Encrypt for internal hostnames"
 ---
 ## Why and How?
-
 One of the obvious issues with [lets encrypt](https://letsencrypt.org/) is how do we use it to create certificates for hostnames that don't exist on the internet?  Let me describe a scenario; a company has both an internal and external view of their
 domain. The external hosts can easily be setup with lets encrypt, but the internal hosts do not appear in the external view and can't be validated. How do we make this work?  
 
 ## What you have now
-
 Let's start with a few basics. I'm going to assume you're using bind, but any DNS server that supports different views/ddns/tsig will work. You probably have something like this:
 
 ```
@@ -37,7 +35,6 @@ view "external" {
 In the internal view you might have a hostname like "infranet.exampledomain.com", which does not exist externally. How do we get Lets Encrypt to assign us a certificate for this hostname?
 
 ## RFC 2136
-
 [RFC 2136](https://en.wikipedia.org/wiki/Dynamic_DNS) allows us to perform dynamic DNS updates. We will be using this in combination with certbot to update our DNS servers external zone with an ACME text record temporarily. 
 This record will look like this:
 
@@ -149,6 +146,7 @@ From here you can load into whatever daemon configuration you need.
 /etc/letsencrypt/live/infranet.exampledomain.com/fullchain.pem
 ```
 
+## Dealing with renewals
 If you're using apache or nginx, you may want to consider adding -i apache (or nginx) to the certbot command. Or you can edit the /etc/letsencrypt/renewal/infranet.exampledomain.com.conf after the fact and add the following under the [renewalparams]
 
 ```
@@ -159,6 +157,5 @@ or
 installer = nginx
 ```
 
-## Dealing with renewals
 Debian by default will call reload on apache to rotate the logs once a week, so this may not be strictly necessary. Your mileage may vary, and you may want to setup something in /etc/letsencrypt/renewal-hooks/post if
 you're using a daemon that doesn't regularly reload it's certificates.
