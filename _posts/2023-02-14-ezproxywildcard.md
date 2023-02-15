@@ -20,7 +20,8 @@ This record will cause any lookups to to that subdomain to resolve to 192.168.1.
 intend to run the EZproxy daemon from:
 
 ```
-certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini -d "*.proxy.yourdomain.com" -d "proxy.yourdomain.com"
+certbot certonly --dns-rfc2136 --dns-rfc2136-credentials /etc/letsencrypt/dns-creds.ini \ 
+	-d "*.proxy.yourdomain.com" -d "proxy.yourdomain.com"
 ```
 
 A possible hangup; make sure you have an update-policy allowing _acme-challenge.proxy.yourdomain.com to be updated:
