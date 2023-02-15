@@ -34,7 +34,7 @@ update-policy {
 
 ## Configuring EZproxy
 EZproxy can be configured to take advantage of this, rather than using an individual port per database resource. There are several advantages of doing this, but a major one is simplifying firewall configurations
-and not having to worry about potential network egress filtering remote clients may or may not have. A snipet from what you EZproxy config.txt might look like here:
+and not having to worry about potential network egress filtering remote clients may or may not have. A snippet from what you EZproxy config.txt might look like here:
 
 ```
 Name proxy.yourdomain.com
