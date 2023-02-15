@@ -41,7 +41,7 @@ Name proxy.yourdomain.com
 Option ProxyByHostname
 ```
 
-Additional documentation about this can be found <a href=https://help.oclc.org/Library_Management/EZproxy/EZproxy_configuration/Migrate_to_Proxy_by_Hostname>here</a>
+Additional documentation about this can be found <a href="https://help.oclc.org/Library_Management/EZproxy/EZproxy_configuration/Migrate_to_Proxy_by_Hostname">here</a>.
 
 EZproxy itself doesn't have a way to specify the location of a certificate from it's config.txt. Instead this is handled through the web administrative page. We however want to automate
 this process. The locations of the certificates created by certbot are here:
